@@ -154,7 +154,7 @@ const RightPanel = ({ onTweet, onShare, shortcutsEnabled, onToggleShortcuts, det
         {detailsVisible && (
             <>
                 <img 
-                    src="src/profile-pic.jpeg"
+                    src="./profile-pic.jpeg"
                     alt="Profile" 
                     className="profile-photo-square" 
                     onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/50x50/0A0F0D/39FF14?text=PIC"; }}
