@@ -176,7 +176,7 @@ const RightPanel = ({ onTweet, onShare, shortcutsEnabled, onToggleShortcuts, det
                         <button className="email-button" onClick={() => alert('Subscribed!')}>✓</button>
                     </label>
                     <div>or <a href="mailto:contact@example.com">click here to say hi!</a></div>
-                    <a href="https://www.buymeacoffee.com/your-page" target="_blank" rel="noopener noreferrer" className="support-link">Support Me</a>
+                    <a href="https://www.buymeacoffee.com/tusharsharma-create" target="_blank" rel="noopener noreferrer" className="support-link">Support Me</a>
                 </div>
             </>
         )}
