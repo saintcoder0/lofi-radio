@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useReducer, useCallback } from 'react';
+// We don't import App.css here because it's imported in main.jsx
 
 // --- Data ---
 const YOUTUBE_STREAMS = [
@@ -19,294 +20,14 @@ const SCENES = [
     { background: "https://i.pinimg.com/originals/48/6d/71/486d712057eea11871314c6485f56894.gif", foreground: null }
 ];
 
+// This data is now handled in App.css, but we keep it here for theme logic
 const THEMES = [
-    {
-        name: 'Terminal',
-        '--bg-dark': '#0A0F0D',
-        '--text-primary': '#39FF14',
-        '--text-secondary': '#2ECC71',
-        '--accent-amber': '#FFBF00',
-        '--border-color': '#1E8449'
-    },
-    {
-        name: 'Amber',
-        '--bg-dark': '#1a1000',
-        '--text-primary': '#FFBF00',
-        '--text-secondary': '#D4A000',
-        '--accent-amber': '#FFFFFF',
-        '--border-color': '#D4A000'
-    },
-    {
-        name: 'Arctic',
-        '--bg-dark': '#0d1a26',
-        '--text-primary': '#a8d5ff',
-        '--text-secondary': '#6a8aab',
-        '--accent-amber': '#ff8a8a',
-        '--border-color': '#6a8aab'
-    },
-    {
-        name: 'Vaporwave',
-        '--bg-dark': '#1a0d26',
-        '--text-primary': '#ff79c6',
-        '--text-secondary': '#bd93f9',
-        '--accent-amber': '#50fa7b',
-        '--border-color': '#bd93f9'
-    }
+    { name: 'Terminal', class: 'theme-terminal' },
+    { name: 'Amber', class: 'theme-amber' },
+    { name: 'Arctic', class: 'theme-arctic' },
+    { name: 'Vaporwave', class: 'theme-vaporwave' }
 ];
 
-
-// --- CSS (as a Component) ---
-const GlobalStyles = ({ theme }) => (
-    <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-        :root {
-            --bg-dark: ${theme['--bg-dark']};
-            --text-primary: ${theme['--text-primary']};
-            --text-secondary: ${theme['--text-secondary']};
-            --accent-amber: ${theme['--accent-amber']};
-            --border-color: ${theme['--border-color']};
-            --font-family: 'VT323', monospace;
-            --ui-bg-color: rgba(10, 20, 15, 0.8);
-        }
-        body {
-            font-family: var(--font-family);
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            letter-spacing: 0.075em;
-            text-shadow: 0 0 5px var(--text-primary);
-        }
-        button, .icon-link {
-            font-family: var(--font-family);
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            cursor: pointer;
-            padding: 0;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.2s ease, text-shadow 0.2s ease;
-        }
-        button:hover, .icon-link:hover {
-            text-shadow: 0 0 8px var(--accent-amber);
-            color: var(--accent-amber);
-        }
-        button:disabled {
-            color: var(--text-secondary) !important;
-            cursor: not-allowed;
-            text-shadow: none !important;
-        }
-
-        /* --- New Startup & Click to Start --- */
-        .start-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #000;
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: opacity 0.5s ease;
-            text-align: center;
-        }
-         .start-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-         }
-        .start-screen h1 {
-            font-size: 3rem;
-            margin: 0;
-            text-shadow: 0 0 8px var(--text-primary);
-        }
-        .start-screen p {
-            font-size: 1.5rem;
-            animation: blink 2s steps(1, end) infinite;
-        }
-
-        .startup-container {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #000; z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            box-sizing: border-box;
-            opacity: 1;
-            animation: fade-out-startup 1.5s 5s forwards;
-            pointer-events: none;
-        }
-        .boot-sequence > p {
-            margin: 0;
-            line-height: 1.6;
-        }
-        .blinking-cursor {
-            width: 0.8em;
-            height: 1.5em;
-            background: var(--text-primary);
-            display: inline-block;
-            vertical-align: middle;
-            animation: blink 1s steps(1, end) infinite;
-        }
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-        @keyframes fade-out-startup {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        .app-container { position: relative; width: 100vw; height: 100vh; }
-        .background-visual-container, .crt-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -2; pointer-events: none;
-        }
-        .visual-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; transition: opacity 1.5s ease-in-out;
-            filter: brightness(0.8) contrast(1.1);
-        }
-        .visual-layer.foreground.animated { animation: subtle-drift 45s linear infinite alternate; }
-        @keyframes subtle-drift {
-            from { transform: translateX(-1%); }
-            to { transform: translateX(1%); }
-        }
-        .crt-overlay {
-             background: repeating-linear-gradient(0deg, rgba(10, 15, 13, 0.2), rgba(10, 15, 13, 0.2) 1px, transparent 1px, transparent 3px);
-             z-index: 20;
-        }
-        #youtube-player-container {
-            position: fixed; top: -9999px; left: -9999px; z-index: 5;
-            transition: all 0.5s ease;
-        }
-        #youtube-player-container.visible {
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 80vw; height: calc(80vw * 9 / 16); max-width: 1280px; max-height: 720px;
-            border: 4px solid var(--text-primary); box-shadow: 0 0 25px var(--text-primary);
-        }
-        .top-left-panel, .right-panel, .bottom-left-panel, .bottom-track-info, .bottom-right-panels {
-            z-index: 15; transition: opacity 0.5s ease-in-out;
-        }
-        .top-left-panel { position: fixed; top: 2rem; left: 2rem; font-size: 1.4rem; }
-        .copied-message { color: var(--accent-amber); }
-        .right-panel { position: fixed; top: 2rem; right: 2rem; text-align: right; font-size: 1.2rem; }
-        .icon-bar { display: flex; gap: 0.75rem; justify-content: flex-end; margin-bottom: 1.5rem; align-items: center; }
-        .icon-bar .icon-link, .icon-bar button {
-            color: var(--text-primary);
-            font-size: 1.75rem;
-            width: 32px;
-            height: 32px;
-        }
-        .profile-photo-square {
-            width: 50px; height: 50px; border: 2px solid var(--border-color);
-            margin-bottom: 1.5rem; margin-left: auto; object-fit: cover;
-            background-color: var(--text-secondary); border-radius: 4px;
-        }
-        .shortcuts-list span { color: var(--text-secondary); }
-        .shortcuts-list div { margin-bottom: 0.5rem; }
-        .settings-options { margin-top: 1.5rem; }
-        .settings-options label {
-            display: flex; align-items: center; justify-content: flex-end;
-            gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;
-        }
-        .settings-options input[type="email"] {
-            background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary);
-            font-family: var(--font-family); padding: 0.25rem; width: 150px;
-        }
-        .settings-options .email-button { color: var(--text-primary); }
-        .settings-options a { color: var(--text-primary); text-decoration: none; }
-        .support-link {
-            display: inline-block; margin-top: 1rem; padding: 0.25rem 0.5rem;
-            border: 1px solid var(--border-color);
-        }
-        .bottom-left-panel { position: fixed; bottom: 2rem; left: 2rem; display: flex; flex-direction: column; gap: 0.5rem; }
-        .player-controls { display: flex; align-items: center; gap: 1rem; font-size: 1.5rem; }
-        .player-controls button { padding: 4px; }
-        .volume-bar { 
-            display: flex; gap: 2px; margin-left: 1rem; cursor: pointer; padding: 0.25rem;
-        }
-        .volume-segment { width: 5px; height: 16px; background-color: var(--text-secondary); }
-        .volume-segment.active { background-color: var(--text-primary); box-shadow: 0 0 5px var(--text-primary); }
-        
-        .bottom-track-info {
-            font-size: 1.4rem; white-space: nowrap; display: flex; align-items: center;
-        }
-
-        .visualizer {
-            display: flex; align-items: flex-end; gap: 2px; height: 20px; margin-left: 1.5rem;
-        }
-        .visualizer-bar { width: 5px; background-color: var(--text-primary); }
-        .visualizer.playing .visualizer-bar:nth-child(1) { animation: beat 0.6s infinite alternate; }
-        .visualizer.playing .visualizer-bar:nth-child(2) { animation: beat 0.8s infinite alternate-reverse; }
-        .visualizer.playing .visualizer-bar:nth-child(3) { animation: beat 0.7s infinite alternate; }
-        .visualizer.playing .visualizer-bar:nth-child(4) { animation: beat 0.5s infinite alternate-reverse; }
-        .visualizer.playing .visualizer-bar:nth-child(5) { animation: beat 0.9s infinite alternate; }
-        @keyframes beat { from { height: 2px; } to { height: 20px; } }
-        
-        .bottom-right-panels {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            display: flex;
-            align-items: flex-end;
-            gap: 1rem;
-            flex-wrap: wrap-reverse;
-            justify-content: flex-end;
-        }
-        
-        .todo-panel, .pomodoro-panel {
-            background-color: var(--ui-bg-color);
-            border: 1px solid var(--border-color); border-top: 4px solid var(--accent-amber);
-            padding: 1rem; text-align: left;
-            background-image: linear-gradient(rgba(0,255,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,0,0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .todo-panel.hidden, .pomodoro-panel.hidden {
-            opacity: 0;
-            transform: translateY(20px);
-            pointer-events: none;
-        }
-        .todo-panel { width: 280px; }
-        .pomodoro-panel { width: 220px; text-align: center; }
-
-        .panel-title {
-            font-size: 1.4rem; text-align: center; color: var(--accent-amber);
-            margin-top: 0; margin-bottom: 1rem;
-        }
-        .task-input-area { display: flex; gap: 0.5rem; margin-top: 1rem; }
-        .task-input-area input {
-            flex-grow: 1; background: var(--bg-dark); border: 1px solid var(--border-color);
-            color: var(--text-primary); font-family: var(--font-family); padding: 0.25rem;
-        }
-        .task-input-area button { color: var(--text-primary); }
-        #task-list { list-style-type: none; padding: 0; max-height: 150px; overflow-y: auto; }
-        #task-list li {
-            display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;
-        }
-        #task-list .remove-task-btn {
-            color: var(--text-primary); font-size: 1.1rem; padding-left: 0.5rem;
-        }
-        .pomodoro-time {
-            font-size: 3.5rem;
-            margin: 0.5rem 0;
-        }
-        .pomodoro-controls {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-        }
-        .pomodoro-controls button {
-            font-size: 1.2rem;
-            padding: 0.25rem 0.75rem;
-            border: 1px solid var(--border-color);
-        }
-    `}</style>
-);
 
 // --- State Management ---
 const initialState = {
@@ -599,6 +320,10 @@ function App() {
         isAnimationComplete, audioContext, isFullscreen, isPomodoroVisible
     } = state;
 
+    useEffect(() => {
+        document.body.className = THEMES[themeIndex].class;
+    }, [themeIndex]);
+
     const handleStart = () => {
         dispatch({ type: 'APP_START' });
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -723,7 +448,7 @@ function App() {
 
     return (
         <>
-            <GlobalStyles theme={THEMES[themeIndex]}/>
+            {/* The GlobalStyles component is no longer needed here as styles are in App.css */}
             {!appStarted && <StartScreen onClick={handleStart} />}
             {appStarted && !isAnimationComplete && <StartupAnimation audioContext={audioContext}/>}
             <div className={`transition-opacity duration-500 ${isAnimationComplete ? 'opacity-100' : 'opacity-0'}`}>
@@ -770,6 +495,8 @@ function App() {
 }
 
 export default App;
+
+
 
 
 
