@@ -154,10 +154,10 @@ const RightPanel = ({ onTweet, onShare, shortcutsEnabled, onToggleShortcuts, det
         {detailsVisible && (
             <>
                 <img 
-                    src="./profile-pic.jpeg"
+                    src="https://media.licdn.com/dms/image/v2/D4D03AQELGT723yMoUg/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1730826965529?e=1755129600&v=beta&t=O2kGqiZVMdqykdH2dOqRDS7LRdCnWX6JHZ2H83FYlfc"
                     alt="Profile" 
                     className="profile-photo-square" 
-                    onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/50x50/0A0F0D/39FF14?text=PIC"; }}
+                    onError={(e) => { e.target.onerror = null; e.target.src="https://media.licdn.com/dms/image/v2/D4D03AQELGT723yMoUg/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1730826965529?e=1755129600&v=beta&t=O2kGqiZVMdqykdH2dOqRDS7LRdCnWX6JHZ2H83FYlfc"; }}
                 />
                 <div className="shortcuts-list">
                     <div><span>spacebar</span> play/pause</div>
