@@ -353,7 +353,7 @@ const RightPanel = ({ onTweet, onShare, shortcutsEnabled, onToggleShortcuts, det
         {detailsVisible && (
             <>
                 <img 
-                    src="src/assets/1730826965556.jpeg"
+                    src="https://github.com/saintcoder0/lofi-radio/blob/b30d6008470fb970e5b1f53f9367cb4445e9defc/src/assets/1730826965556.jpeg"
                     alt="Profile" 
                     className="profile-photo-square" 
                     onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/50x50/0A0F0D/39FF14?text=PIC"; }}
