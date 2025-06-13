@@ -95,7 +95,7 @@ const playGlitchSound = (audioContext) => {
 // --- Components ---
 const StartScreen = ({ onClick }) => (
     <div className="start-screen" onClick={onClick}>
-        <h1>Lofi OS</h1>
+        <h1>Lofiterminal</h1>
         <p>Click to Start</p>
     </div>
 );
